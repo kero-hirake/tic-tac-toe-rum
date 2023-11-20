@@ -3,7 +3,7 @@
  ["src"]
 
  :dependencies
- []
+ [[rum "0.12.11"]]
 
  :dev-http {5003 "resources/public"}
  :builds
