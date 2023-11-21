@@ -2,6 +2,23 @@
   (:require [rum.core :refer [defc defcs mount local]]
             ["react" :as r]
             ["react-dom/client" :as rdom]))
+(defn calcurate-winner [squares]
+  (let [lines [[0 1 2]
+               [3 4 5]
+               [6 7 8]
+               [0 3 6]
+               [1 4 7]
+               [2 5 8]
+               [0 4 8]
+               [2 4 6]]]
+    (some-> (filter (fn [[a b c]]
+                      (and (squares a)
+                           (= (squares a)
+                              (squares b)
+                              (squares c))))
+                    lines)
+            first
+            (#(squares (first %))))))
 
 (defc square  [& {:keys [value on-square-click]}]  
   [:div.square
@@ -13,11 +30,16 @@
                       ::state)
   [{::keys [state]}] 
   (let [{:keys [x-is-next? squares]} @state
+        winner (calcurate-winner squares)
+        status (if winner
+                 (str "Winner: " winner)
+                 (str "Next player: " (if x-is-next? "X" "O")))
         handle-click (fn [i]
-                       (when-not (get squares i)
+                       (when-not (or (get squares i) winner)
                          (swap! state assoc-in [:squares i] (if x-is-next? "X" "O"))
                          (swap! state update :x-is-next? not)))]
-    [:*
+    [:* 
+     [:div.status  status]
      [:div.board-row 
       (square :value (get squares 0) :on-square-click #(handle-click 0))
       (square :value (get squares 1) :on-square-click #(handle-click 1))
