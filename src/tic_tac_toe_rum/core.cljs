@@ -8,23 +8,28 @@
    {:on-click on-square-click}
    value])
 
-(defcs board < (local (vec (repeat 9 nil)) ::squares)
-  [{::keys [squares]}] 
-  (let [handle-click (fn [i]
-                       (println "clicked " (swap! squares assoc i "X")))]
+(defcs board < (local {:x-is-next? true
+                       :squares (vec (repeat 9 nil))} 
+                      ::state)
+  [{::keys [state]}] 
+  (let [{:keys [x-is-next? squares]} @state
+        handle-click (fn [i]
+                       (when-not (get squares i)
+                         (swap! state assoc-in [:squares i] (if x-is-next? "X" "O"))
+                         (swap! state update :x-is-next? not)))]
     [:*
      [:div.board-row 
-      (square :value (get @squares 0) :on-square-click #(handle-click 0))
-      (square :value (get @squares 1) :on-square-click #(handle-click 1))
-      (square :value (get @squares 2) :on-square-click #(handle-click 2)) ]
+      (square :value (get squares 0) :on-square-click #(handle-click 0))
+      (square :value (get squares 1) :on-square-click #(handle-click 1))
+      (square :value (get squares 2) :on-square-click #(handle-click 2)) ]
      [:div.board-row
-      (square :value (get @squares 3) :on-square-click #(handle-click 3))
-      (square :value (get @squares 4) :on-square-click #(handle-click 4))
-      (square :value (get @squares 5) :on-square-click #(handle-click 5))]
+      (square :value (get squares 3) :on-square-click #(handle-click 3))
+      (square :value (get squares 4) :on-square-click #(handle-click 4))
+      (square :value (get squares 5) :on-square-click #(handle-click 5))]
      [:div.board-row
-      (square :value (get @squares 6) :on-square-click #(handle-click 6))
-      (square :value (get @squares 7) :on-square-click #(handle-click 7))
-      (square :value (get @squares 8) :on-square-click #(handle-click 8))]]))
+      (square :value (get squares 6) :on-square-click #(handle-click 6))
+      (square :value (get squares 7) :on-square-click #(handle-click 7))
+      (square :value (get squares 8) :on-square-click #(handle-click 8))]]))
 
 (defc app []
   [:*  
