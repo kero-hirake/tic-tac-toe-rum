@@ -1,28 +1,42 @@
 (ns tic-tac-toe-rum.core
-  (:require [rum.core :refer [defc mount]]
+  (:require [rum.core :refer [defc defcs mount local]]
             ["react" :as r]
             ["react-dom/client" :as rdom]))
 
-(defc square [& {:keys [value]}]
-  [:div.square value])
+(defcs square < (local nil ::value) 
+  [state]  
+  (let [local-atom (::value state)
+        handle-click (fn [] (swap! local-atom (fn[_] "X")))]
+    [:div.square 
+     {:on-click handle-click} 
+     @local-atom]))
+
+(defcs stateful < (local 0 ::key)
+  [state label]
+  (let [local-atom (::key state)]
+    [:div {:on-click (fn [_] (swap! local-atom inc))}
+     label ": " @local-atom]))
 
 (defc board []
   [:*
    [:div.board-row 
-    (square :value 1)
-    (square :value 2)
-    (square :value 3) ]
+    (square)
+    (square)
+    (square) ]
    [:div.board-row
-    (square :value 4)
-    (square :value 5)
-    (square :value 6)]
+    (square)
+    (square)
+    (square)]
    [:div.board-row
-    (square :value 7)
-    (square :value 8)
-    (square :value 9)]])
+    (square)
+    (square)
+    (square)]])
+
 
 (defc app []
-  (board))
+  [:* 
+   (stateful "click count")
+   (board)])
 
 (defn init []
   ; FIX: react-dom.development.js:87 Warning: ReactDOM.render is no longer supported in React 18 
